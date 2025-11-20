@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Telefon - Hisob Kitob Ilovasi</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 15px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+            color: #764ba2;
+        }
+
+        .header p {
+            font-size: 1rem;
+            opacity: 0.8;
+        }
+
+        .form-section {
+            background-color: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .scanner-section {
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .scanner-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .scanner-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .scanner-btn i {
+            font-size: 1.3rem;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e1e1e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            border-color: #667eea;
+            outline: none;
+        }
+
+        .submit-btn {
+            background: linear-gradient(135deg, #4CAF50 0%, #2E7D32 100%);
+            color: white;
+            border: none;
+            padding: 15px 20px;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .camera-section {
+            display: none;
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        #cameraPreview {
+            width: 100%;
+            max-width: 300px;
+            height: 300px;
+            background-color: #000;
+            border-radius: 10px;
+            margin: 0 auto 15px;
+        }
+
+        .camera-controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .camera-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .capture-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .cancel-camera-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .status-message {
+            text-align: center;
+            padding: 10px;
+            margin-top: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .recent-products {
+            background-color: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .recent-products h3 {
+            margin-bottom: 15px;
+            color: #764ba2;
+            text-align: center;
+        }
+
+        .product-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .product-item:last-child {
+            border-bottom: none;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .form-section, .recent-products {
+                padding: 20px 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Hisob Kitob Ilovasi</h1>
+            <p>Telefon uchun standart shakl</p>
+        </div>
+
+        <div class="form-section">
+            <div class="scanner-section">
+                <button class="scanner-btn" id="scannerBtn">
+                    <i>📷</i> Skanerlash
+                </button>
+            </div>
+            
+            <div class="camera-section" id="cameraSection">
+                <div id="cameraPreview"></div>
+                <div class="camera-controls">
+                    <button class="camera-btn capture-btn" id="captureBtn">Skanerlash</button>
+                    <button class="camera-btn cancel-camera-btn" id="cancelCameraBtn">Bekor qilish</button>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <label for="productName">Mahsulot nomi</label>
+                <input type="text" id="productName" placeholder="Mahsulot nomini kiriting">
+            </div>
+            
+            <div class="input-group">
+                <label for="productQuantity">Soni</label>
+                <input type="number" id="productQuantity" placeholder="Mahsulot sonini kiriting" min="1" value="1">
+            </div>
+            
+            <div class="input-group">
+                <label for="productPrice">Narxi</label>
+                <input type="number" id="productPrice" placeholder="Mahsulot narxini kiriting" min="0" step="0.01">
+            </div>
+            
+            <button class="submit-btn" id="submitBtn">Jo'natish</button>
+            
+            <div class="status-message" id="statusMessage"></div>
+        </div>
+
+        <div class="recent-products">
+            <h3>So'ngi qo'shilgan mahsulotlar</h3>
+            <div id="recentProductsList">
+                <!-- So'ngi qo'shilgan mahsulotlar bu yerda paydo bo'ladi -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Mahsulotlar bazasi
+        const productDatabase = {
+            "1234567890123": { name: "Non", price: 3000 },
+            "2345678901234": { name: "Sut", price: 8000 },
+            "3456789012345": { name: "Pishloq", price: 25000 },
+            "4567890123456": { name: "Go'sht", price: 65000 },
+            "5678901234567": { name: "Sabzi", price: 4000 },
+            "6789012345678": { name: "Kartoshka", price: 5000 },
+            "7890123456789": { name: "Pomidor", price: 8000 },
+            "8901234567890": { name: "Bodring", price: 6000 },
+            "9012345678901": { name: "Olma", price: 12000 },
+            "0123456789012": { name: "Banan", price: 18000 }
+        };
+
+        // DOM elementlari
+        const scannerBtn = document.getElementById('scannerBtn');
+        const cameraSection = document.getElementById('cameraSection');
+        const cameraPreview = document.getElementById('cameraPreview');
+        const captureBtn = document.getElementById('captureBtn');
+        const cancelCameraBtn = document.getElementById('cancelCameraBtn');
+        const productNameInput = document.getElementById('productName');
+        const productQuantityInput = document.getElementById('productQuantity');
+        const productPriceInput = document.getElementById('productPrice');
+        const submitBtn = document.getElementById('submitBtn');
+        const statusMessage = document.getElementById('statusMessage');
+        const recentProductsList = document.getElementById('recentProductsList');
+
+        // Kamera o'zgaruvchilari
+        let stream = null;
+        let isCameraActive = false;
+
+        // Skanerlash tugmasi
+        scannerBtn.addEventListener('click', function() {
+            startCamera();
+        });
+
+        // Kamerani ishga tushirish
+        function startCamera() {
+            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+                navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } })
+                    .then(function(mediaStream) {
+                        stream = mediaStream;
+                        cameraPreview.srcObject = stream;
+                        cameraSection.style.display = 'block';
+                        scannerBtn.style.display = 'none';
+                        isCameraActive = true;
+                    })
+                    .catch(function(error) {
+                        console.error("Kamerani ochishda xatolik:", error);
+                        showStatus("Kamerani ochishda xatolik. Qaytadan urinib ko'ring.", "error");
+                        // Agar kamera ishlamasa, simulyatsiyani ishga tushirish
+                        simulateScan();
+                    });
+            } else {
+                showStatus("Kamera qo'llab-quvvatlanmaydi. Simulyatsiya ishlatilmoqda.", "error");
+                simulateScan();
+            }
+        }
+
+        // Skanerlash simulyatsiyasi
+        function simulateScan() {
+            const barcodes = Object.keys(productDatabase);
+            const randomBarcode = barcodes[Math.floor(Math.random() * barcodes.length)];
+            const product = productDatabase[randomBarcode];
+            
+            productNameInput.value = product.name;
+            productPriceInput.value = product.price;
+            productQuantityInput.focus();
+            
+            showStatus(`Mahsulot skanerlandi: ${product.name}`, "success");
+        }
+
+        // Skanerlash tugmasi (kameradan)
+        captureBtn.addEventListener('click', function() {
+            if (isCameraActive) {
+                // Haqiqiy loyihada bu yerda skanerlash kutubxonasi ishlatiladi
+                // Hozircha simulyatsiya qilamiz
+                simulateScan();
+                stopCamera();
+            }
+        });
+
+        // Kamerani yopish
+        cancelCameraBtn.addEventListener('click', function() {
+            stopCamera();
+        });
+
+        // Kamerani to'xtatish
+        function stopCamera() {
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+            cameraSection.style.display = 'none';
+            scannerBtn.style.display = 'block';
+            isCameraActive = false;
+        }
+
+        // Status xabarlarini ko'rsatish
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = 'status-message ' + type;
+            statusMessage.style.display = 'block';
+            
+            setTimeout(function() {
+                statusMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        // Mahsulot qo'shish
+        submitBtn.addEventListener('click', function() {
+            const name = productNameInput.value.trim();
+            const quantity = parseInt(productQuantityInput.value);
+            const price = parseFloat(productPriceInput.value);
+            
+            if (!name || isNaN(quantity) || quantity <= 0 || isNaN(price) || price < 0) {
+                showStatus("Iltimos, barcha maydonlarni to'g'ri to'ldiring!", "error");
+                return;
+            }
+            
+            // Mahsulotni yaratish
+            const product = {
+                name: name,
+                quantity: quantity,
+                price: price,
+                total: quantity * price,
+                timestamp: new Date().toLocaleString()
+            };
+            
+            // Kompyuter ilovasiga yuborish (simulyatsiya)
+            sendToComputer(product);
+            
+            // So'ngi mahsulotlar ro'yxatini yangilash
+            addToRecentProducts(product);
+            
+            // Formani tozalash
+            productNameInput.value = '';
+            productQuantityInput.value = '1';
+            productPriceInput.value = '';
+            
+            showStatus("Mahsulot muvaffaqiyatli qo'shildi!", "success");
+        });
+
+        // Kompyuter ilovasiga yuborish (simulyatsiya)
+        function sendToComputer(product) {
+            // Haqiqiy loyihada bu yerda server orqali yoki WebSocket orqali ma'lumot uzatiladi
+            // Hozircha localStorage orqali simulyatsiya qilamiz
+            let computerProducts = JSON.parse(localStorage.getItem('computerProducts')) || [];
+            product.id = Date.now(); // Unikal ID
+            computerProducts.push(product);
+            localStorage.setItem('computerProducts', JSON.stringify(computerProducts));
+            
+            console.log("Kompyuterga yuborildi:", product);
+        }
+
+        // So'ngi mahsulotlar ro'yxatini yangilash
+        function addToRecentProducts(product) {
+            const productItem = document.createElement('div');
+            productItem.className = 'product-item';
+            productItem.innerHTML = `
+                <span>${product.name}</span>
+                <span>${product.quantity} x ${product.price.toLocaleString()} = ${product.total.toLocaleString()} so'm</span>
+            `;
+            
+            recentProductsList.insertBefore(productItem, recentProductsList.firstChild);
+            
+            // Agar 5 tadan ko'p bo'lsa, eng eskisini o'chirish
+            if (recentProductsList.children.length > 5) {
+                recentProductsList.removeChild(recentProductsList.lastChild);
+            }
+        }
+
+        // Dastur yuklanganda so'ngi mahsulotlarni yuklash
+        document.addEventListener('DOMContentLoaded', function() {
+            // Bu yerda oldin qo'shilgan mahsulotlarni yuklash mumkin
+        });
+    </script>
+</body>
+</html>
