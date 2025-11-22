@@ -588,146 +588,86 @@
         });
 
     </script>
-    <!-- Firebase kutubxonalari -->
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
-
-<script>
-// Kompyuter uchun Firebase funksiyalari
-class ComputerFirebaseManager {
-    constructor() {
-        this.newProductsCount = 0;
-        this.init();
-    }
-
-    init() {
-        // Telefon ulanganligini tekshirish
-        FirebaseManager.checkPhoneConnection((connected) => {
-            this.updateConnectionStatus(connected);
-        });
-
-        // Telefondan yangi mahsulotlarni tinglash
-        FirebaseManager.listenForScannedProducts((product) => {
-            this.handleNewProduct(product);
-        });
-
-        // Oldindan saqlangan mahsulotlarni yuklash
-        this.loadSavedProducts();
-    }
-
-    updateConnectionStatus(connected) {
-        const statusElement = document.getElementById('connectionStatus');
-        const counterElement = document.getElementById('newProductsCount');
-        
-        if (connected) {
-            statusElement.innerHTML = '📱 Telefon ulangan';
-            statusElement.className = 'status-online';
-        } else {
-            statusElement.innerHTML = '📱 Telefon ulanmagan';
-            statusElement.className = 'status-offline';
-        }
-    }
-
-    handleNewProduct(product) {
-        this.newProductsCount++;
-        this.updateNotificationCounter();
-        
-        // Mahsulotni jadvalga qo'shish
-        this.addProductToTable(product);
-        
-        // Bildirishnoma
-        this.showNotification(`Yangi mahsulot: ${product.name} - ${product.quantity} ta`);
-    }
-
-    addProductToTable(product) {
-        const total = product.quantity * product.price;
-        
-        const newRow = document.createElement('tr');
-        newRow.innerHTML = `
-            <td>${product.name}</td>
-            <td>${product.quantity}</td>
-            <td>${this.formatNumber(product.price)}</td>
-            <td>${this.formatNumber(total)}</td>
-            <td class="product-actions">
-                <button class="save-btn" onclick="saveProductToDatabase('${product.name}', ${product.price})">+</button>
-                <button class="delete-btn" onclick="this.closest('tr').remove(); calculateTotal();">x</button>
-            </td>
-        `;
-        
-        document.getElementById('productsTableBody').appendChild(newRow);
-        calculateTotal();
-        saveData();
-    }
-
-    updateNotificationCounter() {
-        document.getElementById('newProductsCount').textContent = this.newProductsCount;
-    }
-
-    showNotification(message) {
-        if ("Notification" in window) {
-            if (Notification.permission === "granted") {
-                new Notification("Yangi Mahsulot", {
-                    body: message,
-                    icon: "/icon.png"
-                });
-            } else if (Notification.permission !== "denied") {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") {
-                        new Notification("Yangi Mahsulot", { body: message });
-                    }
-                });
-            }
-        }
-        
-        // Brauzer bildirishnomasi
-        if (document.hidden) {
-            document.title = `📦 (${this.newProductsCount}) Hisob Kitob`;
-        }
-    }
-
-    formatNumber(num) {
-        return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-    }
-
-    loadSavedProducts() {
-        FirebaseManager.getProductsFromDatabase((products) => {
-            // Mahsulotlarni jadvalga yuklash
-            products.forEach(product => {
-                // Mahsulotni jadvalga qo'shish logikasi
-            });
-        });
-    }
-
-    // Telefonga mahsulot yuborish
-    sendProductToPhone(productData) {
-        return FirebaseManager.sendToPhone(productData);
-    }
-}
-
-// Firebase manager ni ishga tushirish
-let firebaseManager;
-
-document.addEventListener('DOMContentLoaded', function() {
-    firebaseManager = new ComputerFirebaseManager();
+    <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hisob Kitob - Vercel</title>
     
-    // Bildirishnoma ruxsatini so'rash
-    if ("Notification" in window && Notification.permission === "default") {
-        Notification.requestPermission();
-    }
-});
+    <!-- Firebase kutubxonalari -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    
+    <style>
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .online { background: #d4edda; color: #155724; }
+        .offline { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Hisob Kitob - Vercel Test</h1>
+    
+    <div id="firebaseStatus" class="status loading">
+        Firebase yuklanmoqda...
+    </div>
+    
+    <div id="databaseStatus" class="status loading">
+        Database yuklanmoqda...
+    </div>
 
-// Global funksiyalar
-function saveProductToDatabase(name, price) {
-    FirebaseManager.saveProductToDatabase({
-        name: name,
-        price: price,
-        category: 'Vodiy',
-        createdAt: firebase.database.ServerValue.TIMESTAMP
-    }).then(() => {
-        alert(`"${name}" bazaga saqlandi!`);
-    });
-}
-</script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const firebaseStatus = document.getElementById('firebaseStatus');
+            const databaseStatus = document.getElementById('databaseStatus');
+            
+            // Firebase yuklanganligini tekshirish
+            setTimeout(() => {
+                if (typeof firebase === 'undefined') {
+                    firebaseStatus.innerHTML = '❌ Firebase kutubxonasi yuklanmadi';
+                    firebaseStatus.className = 'status offline';
+                    return;
+                }
+                
+                firebaseStatus.innerHTML = '✅ Firebase kutubxonasi yuklandi';
+                firebaseStatus.className = 'status online';
+                
+                // Database tekshirish
+                if (typeof database === 'undefined' || !database) {
+                    databaseStatus.innerHTML = '❌ Database ulanmadi';
+                    databaseStatus.className = 'status offline';
+                    return;
+                }
+                
+                databaseStatus.innerHTML = '✅ Database ulandi';
+                databaseStatus.className = 'status online';
+                
+                // Test yozish
+                database.ref('vercelConnection').set({
+                    status: 'connected',
+                    page: 'index.html',
+                    timestamp: new Date().toISOString(),
+                    vercel: true
+                }).then(() => {
+                    console.log('✅ Vercel ga yozildi');
+                }).catch(error => {
+                    console.error('❌ Vercel yozish xatosi:', error);
+                    databaseStatus.innerHTML = '❌ Database yozish xatosi: ' + error.message;
+                    databaseStatus.className = 'status offline';
+                });
+                
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
 </body>
 </html>

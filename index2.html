@@ -472,107 +472,86 @@
             // Bu yerda oldin qo'shilgan mahsulotlarni yuklash mumkin
         });
     </script>
-    <!-- Firebase kutubxonalari -->
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
-
-<script>
-// Telefon uchun Firebase funksiyalari
-class PhoneFirebaseManager {
-    constructor() {
-        this.init();
-    }
-
-    init() {
-        // Telefon ulanganligini bildirish
-        FirebaseManager.setPhoneConnected();
-        
-        // Kompyuterdan kelgan ma'lumotlarni tinglash
-        this.listenForComputerMessages();
-        
-        // Oldindan saqlangan mahsulotlarni yuklash
-        this.loadProductsForAutocomplete();
-    }
-
-    // Kompyuterdan kelgan ma'lumotlar
-    listenForComputerMessages() {
-        database.ref('fromComputer').on('child_added', (snapshot) => {
-            const message = snapshot.val();
-            this.handleComputerMessage(message);
-            snapshot.ref.remove();
-        });
-    }
-
-    handleComputerMessage(message) {
-        // Kompyuterdan kelgan ma'lumotlarni qayta ishlash
-        console.log('Kompyuterdan:', message);
-        
-        // Masalan: yangi mahsulotlar ro'yxati, sozlamalar, etc.
-        if (message.type === 'productsUpdate') {
-            this.updateProductsList(message.data);
-        }
-    }
-
-    // Mahsulotlarni kompyuterga yuborish
-    sendProductToComputer(productData) {
-        return FirebaseManager.sendScannedProduct({
-            ...productData,
-            scannedAt: firebase.database.ServerValue.TIMESTAMP,
-            device: 'phone'
-        });
-    }
-
-    // Avtomatik to'ldirish uchun mahsulotlarni yuklash
-    loadProductsForAutocomplete() {
-        FirebaseManager.getProductsFromDatabase((products) => {
-            this.products = products;
-            this.setupAutocomplete();
-        });
-    }
-
-    setupAutocomplete() {
-        // Avtomatik to'ldirish logikasi
-        const productInput = document.getElementById('productName');
-        if (productInput && this.products) {
-            // Avtomatik to'ldirishni sozlash
-        }
-    }
-
-    // Sahifa yopilganda ulanmani uzish
-    cleanup() {
-        FirebaseManager.setPhoneDisconnected();
-    }
-}
-
-// Telefon manager ni ishga tushirish
-let phoneFirebaseManager;
-
-document.addEventListener('DOMContentLoaded', function() {
-    phoneFirebaseManager = new PhoneFirebaseManager();
-});
-
-// Sahifa yopilganda tozalash
-window.addEventListener('beforeunload', function() {
-    if (phoneFirebaseManager) {
-        phoneFirebaseManager.cleanup();
-    }
-});
-
-// Global funksiya - mahsulotni kompyuterga yuborish
-function sendScannedProduct(productName, quantity, price) {
-    if (!phoneFirebaseManager) return;
+    <!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hisob Kitob - Vercel</title>
     
-    phoneFirebaseManager.sendProductToComputer({
-        name: productName,
-        quantity: parseInt(quantity),
-        price: parseInt(price)
-    }).then(() => {
-        alert('Kompyuterga yuborildi! ✅');
-    }).catch((error) => {
-        alert('Xatolik: ' + error.message);
-    });
-}
-</script>
+    <!-- Firebase kutubxonalari -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    <script src="firebase-config.js"></script>
+    
+    <style>
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+        }
+        .online { background: #d4edda; color: #155724; }
+        .offline { background: #f8d7da; color: #721c24; }
+        .loading { background: #fff3cd; color: #856404; }
+    </style>
+</head>
+<body>
+    <h1>Hisob Kitob - Vercel Test</h1>
+    
+    <div id="firebaseStatus" class="status loading">
+        Firebase yuklanmoqda...
+    </div>
+    
+    <div id="databaseStatus" class="status loading">
+        Database yuklanmoqda...
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const firebaseStatus = document.getElementById('firebaseStatus');
+            const databaseStatus = document.getElementById('databaseStatus');
+            
+            // Firebase yuklanganligini tekshirish
+            setTimeout(() => {
+                if (typeof firebase === 'undefined') {
+                    firebaseStatus.innerHTML = '❌ Firebase kutubxonasi yuklanmadi';
+                    firebaseStatus.className = 'status offline';
+                    return;
+                }
+                
+                firebaseStatus.innerHTML = '✅ Firebase kutubxonasi yuklandi';
+                firebaseStatus.className = 'status online';
+                
+                // Database tekshirish
+                if (typeof database === 'undefined' || !database) {
+                    databaseStatus.innerHTML = '❌ Database ulanmadi';
+                    databaseStatus.className = 'status offline';
+                    return;
+                }
+                
+                databaseStatus.innerHTML = '✅ Database ulandi';
+                databaseStatus.className = 'status online';
+                
+                // Test yozish
+                database.ref('vercelConnection').set({
+                    status: 'connected',
+                    page: 'index.html',
+                    timestamp: new Date().toISOString(),
+                    vercel: true
+                }).then(() => {
+                    console.log('✅ Vercel ga yozildi');
+                }).catch(error => {
+                    console.error('❌ Vercel yozish xatosi:', error);
+                    databaseStatus.innerHTML = '❌ Database yozish xatosi: ' + error.message;
+                    databaseStatus.className = 'status offline';
+                });
+                
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
 </body>
 </html>

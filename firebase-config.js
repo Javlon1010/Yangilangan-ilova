@@ -1,11 +1,6 @@
-// Firebase kutubxonalari avtomatik yuklanishi uchun
-if (typeof firebase === 'undefined') {
-    console.error('Firebase kutubxonasi yuklanmadi!');
-}
-
-// Firebase konfiguratsiyasi
+// Firebase konfiguratsiyasi - VERCELL UCHUN
 const firebaseConfig = {
-    apiKey: "AIzaSyBxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+    apiKey: "AIzaSyAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
     authDomain: "ilova-ff6cb.firebaseapp.com",
     databaseURL: "https://ilova-ff6cb-default-rtdb.firebaseio.com",
     projectId: "ilova-ff6cb",
@@ -15,38 +10,51 @@ const firebaseConfig = {
 };
 
 // Firebase ni ishga tushirish
-try {
-    firebase.initializeApp(firebaseConfig);
-    console.log('Firebase muvaffaqiyatli ishga tushdi!');
-} catch (error) {
-    console.error('Firebase ishga tushirishda xatolik:', error);
+function initializeFirebase() {
+    try {
+        // Firebase allaqachon ishga tushganligini tekshirish
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+            console.log('✅ Firebase Vercel da ishga tushdi!');
+        } else {
+            firebase.app(); // Allaqachon ishga tushgan app dan foydalanish
+        }
+        return firebase.database();
+    } catch (error) {
+        console.error('❌ Firebase ishga tushirishda xatolik:', error);
+        return null;
+    }
 }
 
-const database = firebase.database();
+// Database ni olish
+const database = initializeFirebase();
 
 // Firebase funksiyalari
 const FirebaseManager = {
-    // Telefondan yangi mahsulot qabul qilish
-    listenForScannedProducts(callback) {
-        database.ref('scannedProducts').on('child_added', (snapshot) => {
-            const product = snapshot.val();
-            console.log('Yangi mahsulot qabul qilindi:', product);
-            callback(product);
-            // O'chirish
-            snapshot.ref.remove();
-        });
+    // Database mavjudligini tekshirish
+    isDatabaseReady() {
+        return database !== null;
     },
 
-    // Kompyuterdan telefonga yuborish
-    sendToPhone(productData) {
-        return database.ref('fromComputer').push({
-            ...productData,
-            timestamp: firebase.database.ServerValue.TIMESTAMP
+    // Telefondan yangi mahsulot qabul qilish
+    listenForScannedProducts(callback) {
+        if (!this.isDatabaseReady()) {
+            console.error('Database tayyor emas!');
+            return;
+        }
+        
+        database.ref('scannedProducts').on('child_added', (snapshot) => {
+            const product = snapshot.val();
+            console.log('📱 Telefondan yangi mahsulot:', product);
+            callback(product);
+            snapshot.ref.remove();
         });
     },
 
     // Telefon ulanganligini tekshirish
     checkPhoneConnection(callback) {
+        if (!this.isDatabaseReady()) return;
+        
         database.ref('phoneConnected').on('value', (snapshot) => {
             callback(snapshot.exists());
         });
@@ -54,11 +62,36 @@ const FirebaseManager = {
 
     // Telefon ulanganligini bildirish
     setPhoneConnected() {
+        if (!this.isDatabaseReady()) return;
         database.ref('phoneConnected').set(true);
     },
 
-    // Telefon uzilganligini bildirish
-    setPhoneDisconnected() {
-        database.ref('phoneConnected').remove();
+    // Test yozish
+    testConnection() {
+        if (!this.isDatabaseReady()) return;
+        
+        database.ref('vercelTest').set({
+            message: 'Vercel test',
+            timestamp: new Date().toISOString(),
+            url: window.location.href
+        }).then(() => {
+            console.log('✅ Vercel test yozildi');
+        }).catch(error => {
+            console.error('❌ Vercel test xatosi:', error);
+        });
     }
 };
+
+// Vercel muhitini tekshirish
+console.log('🌐 Vercel muhiti:', {
+    hostname: window.location.hostname,
+    protocol: window.location.protocol,
+    href: window.location.href
+});
+
+// 2 soniyadan keyin test ishga tushadi
+setTimeout(() => {
+    if (FirebaseManager.isDatabaseReady()) {
+        FirebaseManager.testConnection();
+    }
+}, 2000);
